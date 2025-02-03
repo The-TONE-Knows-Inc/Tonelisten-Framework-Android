@@ -1,29 +1,35 @@
 # Tonelisten Android Framework Guide
 
 ## Introduction
+
 Tonelisten is an android framework that can be used to integrate with Android
-applications. It was primarily written in Java and kotlin for Android. The main concept behind Tonelisten is
+applications. It was primarily written in Java and kotlin for Android. The main concept behind
+Tonelisten is
 to display information to the user when it detects specific frequencies of tones being played
 around the user's android device microphone.
 
-
 ### Pre-requisites
+
 - **Client Key:** Obtain from Tone Framework official site.
 - **Tonelisten Framework:** Available from the Tone Framework Github Page.
 - **Minimum Android API Level:** 23.
 
 ### Embed Tonelisten Framework into Your Project
+
 1. To add the Tonelisten framework into your project:
+
 ```kotlin
 //Kotlin DSL
 implementation("com.toneknows.tonelisten:tonelisten:latest-version)
 ```
+
 ```groovy
 //Groovy Gradle
 implementation 'com.toneknows.tonelisten:tonelisten:latest-version'
 ```
-2. Replace latest version available from [Github](https://github.com/The-TONE-Knows-Inc/Tonelisten-Framework-Android)
 
+2. Replace latest version available
+   from [Github](https://github.com/The-TONE-Knows-Inc/Tonelisten-Framework-Android)or[Maven Central](https://central.sonatype.com/artifact/com.toneknows.tonelisten/tonelisten/overview)
 
 ### Add Device Permissions
 
@@ -31,18 +37,19 @@ implementation 'com.toneknows.tonelisten:tonelisten:latest-version'
 - Open the file app/src/main/AndroidManifest.xml, and add the following code:
 
 ```html
+
 <uses-permission android:name="android.permission.INTERNET"/>
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-<uses-permission android:name="android.permission.RECORD_AUDIO" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 <uses-permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
-tools:ignore="ProtectedPermissions" />
-<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+                 tools:ignore="ProtectedPermissions"/>
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 <!-- Android 14, it must specify appropriate foreground service types -->
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
 ```
 
 Note: For Android 6.0 or later, some important permissions must be requested at runtime
@@ -72,17 +79,19 @@ following code to do so (requestPermissions is a method of an Android Activity).
 
 ```kotlin
 class MainActivity : AppCompatActivity(), ToneUIEventListener {
-  lateinit var toneFramework: ToneFramework
-	@Override
+    lateinit var toneFramework: ToneFramework
+
+    @Override
     override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         //initialize tone SDK
         toneFramework = ToneFramework(this)
         // Or
-		toneFramework = ToneFramework(this, this) // when passing ToneUIEventListener via constructor
+        toneFramework =
+            ToneFramework(this, this) // when passing ToneUIEventListener via constructor
         //check permission
-		toneFramework.checkPermission(ToneFramework.TONE_PERMISSION_CODE, this)
-	}
+        toneFramework.checkPermission(ToneFramework.TONE_PERMISSION_CODE, this)
+    }
 }
 ```
 
@@ -102,29 +111,36 @@ toneFramework.setClientId(clientID);
 - ToneFramework won’t work without this permission.
 
 ```kotlin
-toneFramework.checkPermission(ToneFramework.TONE_PERMISSION_CODE, this) //check for location and microphone permission
+toneFramework.checkPermission(
+    ToneFramework.TONE_PERMISSION_CODE,
+    this
+) //check for location and microphone permission
 
 //(Optional) Tone framework requires bluetooth permission to scan for nearby devices
 toneFramework.requestBluetoothPermissions(ToneFramework.BLUETOOTH_PERMISSION_CODE)
 ```
 
--  Request Code Check: The code verifies if the incoming request code matches
-   `ToneFramework.TONE_PERMISSION_CODE` ensuring it's handling the expected
-   permission request.
+- Request Code Check: The code verifies if the incoming request code matches
+  `ToneFramework.TONE_PERMISSION_CODE` ensuring it's handling the expected
+  permission request.
 
 ```kotlin
 @RequiresApi(Build.VERSION_CODES.O)
-override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-  super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-  if (requestCode == ToneFramework.TONE_PERMISSION_CODE) {
-    // Checking whether the user granted the permission or not.
-    if (grantResults.isNotEmpty() && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-      // Start Service
-      toneFramework.start()
-    } else {
-      Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+override fun onRequestPermissionsResult(
+    requestCode: Int,
+    permissions: Array<out String>,
+    grantResults: IntArray
+) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == ToneFramework.TONE_PERMISSION_CODE) {
+        // Checking whether the user granted the permission or not.
+        if (grantResults.isNotEmpty() && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            // Start Service
+            toneFramework.start()
+        } else {
+            Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
     }
-  }
 }
 ```
 
@@ -135,17 +151,21 @@ override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out
 - If permissions are denied, display a message to grant permission.
 
 ```kotlin
-override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-  super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-  if (requestCode == ToneFramework.TONE_PERMISSION_CODE) {
-    // Checking whether the user granted the permission or not.
-    if (grantResults.isNotEmpty() && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-      // Start Service
-      toneFramework.start()
-    } else {
-      Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+override fun onRequestPermissionsResult(
+    requestCode: Int,
+    permissions: Array<out String>,
+    grantResults: IntArray
+) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == ToneFramework.TONE_PERMISSION_CODE) {
+        // Checking whether the user granted the permission or not.
+        if (grantResults.isNotEmpty() && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            // Start Service
+            toneFramework.start()
+        } else {
+            Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
     }
-  }
 }
 ```
 
@@ -157,14 +177,14 @@ override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out
 
 ```kotlin
 override fun onDestroy() {
-  super.onDestroy()
-  try {
-    toneFramework.finish()
-  } catch (e: IllegalArgumentException) {
-    e.printStackTrace()
-  } catch (e: NullPointerException) {
-    e.printStackTrace()
-  }
+    super.onDestroy()
+    try {
+        toneFramework.finish()
+    } catch (e: IllegalArgumentException) {
+        e.printStackTrace()
+    } catch (e: NullPointerException) {
+        e.printStackTrace()
+    }
 }
 ```
 
@@ -172,7 +192,6 @@ override fun onDestroy() {
 
 - The ‘restart’ method of ‘toneFramework’ is called to restart the service.
 - **For Example:** toneFramework.restart();
-
 
 ### Tone Received:
 
@@ -183,9 +202,10 @@ override fun onDestroy() {
 
 ```kotlin
 override fun onToneReceived(toneModel: ToneModel) {
-  toneFramework.handleToneResponse(toneModel, this)
+    toneFramework.handleToneResponse(toneModel, this)
 }
 ```
+
 ### Tone Tag:
 
 - The `onToneTag` method is implemented as part of the `ToneUIEventListener`
@@ -194,7 +214,7 @@ override fun onToneReceived(toneModel: ToneModel) {
 
 ```kotlin
 override fun onToneTag(toneTag: String) {
-  Log.d("ToneTag", "ToneTag: $toneTag")
+    Log.d("ToneTag", "ToneTag: $toneTag")
 }
 ```
 
@@ -207,11 +227,11 @@ override fun onToneTag(toneTag: String) {
 
 ```kotlin
 override fun isBadCode(badCode: Boolean) {
-  if (badCode) {
-    Log.d("Tag Result", "Bad Code")
-  } else {
-    Log.d("Tag Result", "Good Code")
-  }
+    if (badCode) {
+        Log.d("Tag Result", "Bad Code")
+    } else {
+        Log.d("Tag Result", "Good Code")
+    }
 }
 ```
 
@@ -228,7 +248,7 @@ override fun isBadCode(badCode: Boolean) {
 
 ```kotlin
 override fun onToneReceived(toneModel: ToneModel) {
-  toneFramework.handleToneResponse(toneModel, this@MainActivity)
+    toneFramework.handleToneResponse(toneModel, this@MainActivity)
 }
 ```
 
@@ -270,9 +290,10 @@ ToneFramework.isServiceRunningInForeground(this, MainActivity::class.java)
 
 ```kotlin
 toneFramework.setToneTagInterface { toneTag ->
-  Log.d("TAG", "setToneTag: "+toneTag)
+    Log.d("TAG", "setToneTag: " + toneTag)
 }
 ```
+
 ### Offline Mode:
 
 - Offline mode allows users to interact with tone detection features without requiring
@@ -305,7 +326,7 @@ deleteOfflineData() // delete downloaded offline data of a client
 # and specify the fully qualified class name to the JavaScript interface
 # class:
 -keepclassmembers class fqcn.of.javascript.interface.for.webview {
- public *;
+public *;
 }
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
@@ -329,9 +350,11 @@ app.
 
 1. You can easily build your app bundle using Android Studio(3.2 Canary 14+)
 2. Go to **Build > Build Bundle(s)/APK(s)** and select **Build Bundle(s)**
+
 <center> **OR** </center>
 
 1. use the below command in the Android studio CLI console
+
 ```commandline
 ./gradlew bundle
 ```
